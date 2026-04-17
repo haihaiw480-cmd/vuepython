@@ -1,16 +1,22 @@
 from models.user import User
+from sqlalchemy.exc import IntegrityError
 
 
+# todo: 密码加密存储
 def create_user(db, data):
-    user = User(**data)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-    return user
+    try:
+        user = User(**data)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
+        return user
+    except IntegrityError:
+        db.rollback()
+        return {"code": 400, "msg": "用户名已存在"}
 
 
-def get_user(db, data):
-    user = db.query(User).filter_by(**data).first()
+def get_user_all(db):
+    user = db.query(User).all()
     return user
 
 

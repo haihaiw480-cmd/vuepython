@@ -1,0 +1,9 @@
+[flake8]
+max-line-length = 100
+ignore = 
+    E203,  # 和 black 冲突
+    W503   # 和 black 冲突
+exclude = 
+    .venv,
+    __pycache__,
+    migrations

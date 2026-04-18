@@ -6,6 +6,6 @@
 </template>
 <script setup lang="ts">
 import LayoutClassic from "@/layouts/LayoutClassic/index.vue";
-
+defineOptions({ name: "layout" });
 const layoutComponent = LayoutClassic;
 </script>

@@ -12,7 +12,10 @@
       <el-aside width="200px">
         <div class="aside-box" :style="{ width: '210px' }">
           <el-scrollbar>
-            <el-menu :router="false"> </el-menu>
+            <!-- {{ menuList }} -->
+            <el-menu :router="false" :collapse-transition="false">
+              <MenuItem :menu-list="menuList" />
+            </el-menu>
           </el-scrollbar>
         </div>
       </el-aside>
@@ -24,6 +27,11 @@
 </template>
 <script setup lang="ts" name="LayoutClassic">
 import ToolBarRight from "@/layouts/components/header/ToolBarRight.vue";
+import { useAuthStore } from "@/stores/auth";
+import MenuItem from "../components/MenuItem/index.vue";
+import { computed } from "vue";
+const authStore = useAuthStore();
+const menuList = authStore.authMenuListGet;
 </script>
 <style scoped lang="scss">
 @import "./index.scss";

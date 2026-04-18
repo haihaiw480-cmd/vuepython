@@ -35,6 +35,8 @@ import type { FormInstance, FormRules } from "element-plus";
 import { getUserInfo, createUser, login, register } from "@/api/user";
 import { ref, reactive } from "vue";
 import { useUserStore } from "@/stores/user";
+import { useAuthStore } from "@/stores/auth";
+import { dynamicRouter } from "@/routers/modules/dynamicRouting";
 import router from "@/routers";
 const ruleFormRef = ref<FormInstance>();
 const userStore = useUserStore();
@@ -102,12 +104,10 @@ const loginHandle = (ruleFormRef: FormInstance | undefined) => {
       const { data } = await login({ ...ruleForm });
       // pinia存储token
       userStore.setToken(data.access_token);
-      // 获取动态路由
-
+      // 获取动态路由 并添加到路由中
+      await dynamicRouter();
       // 路由跳转到首页
       router.push(HOME_URL);
-      console.log(userStore.access_token);
-      console.log(data);
     } else {
       console.log("error submit!");
     }

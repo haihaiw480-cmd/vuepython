@@ -7,6 +7,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 import traceback
+from contextlib import asynccontextmanager
+from database.db import test_connection
 
 # app = FastAPI()
 
@@ -27,13 +29,22 @@ def create_app() -> FastAPI:
         # config=config,
         # description=config.SERVER_DESC,
         # version=config.SERVER_VERSION,
-        # lifespan=start_app,
+        lifespan=lifespan,
     )
     # init_exception(app)  # 注册捕获全局异常
     init_router(app)  # 注册路由
     # init_middleware(app)  # 注册请求响应拦截
     # init_cors(app)  # 初始化跨域
     return app
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 🚀 启动时执行
+    print('---------')
+    await test_connection()
+
+    yield
 
 
 app = create_app()

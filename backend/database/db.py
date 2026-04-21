@@ -7,6 +7,7 @@ from sqlalchemy.orm import DeclarativeBase
 from typing import AsyncGenerator
 from sqlalchemy import text
 from models.system.user import User
+from models.system.menu import Menu
 from models.base import BaseModel
 
 DATABASE_URL = "mysql+aiomysql://dev:123456@127.0.0.1:3306/vue_fastapi"
@@ -34,8 +35,10 @@ async def get_db() -> AsyncGenerator[AsyncSession, None]:
 
 async def test_connection():
     try:
-        # async with engine.begin() as conn:
-        #     await conn.run_sync(BaseModel.metadata.create_all)
+
+        async with engine.begin() as conn:
+            print('00------------')
+            await conn.run_sync(BaseModel.metadata.create_all)
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT 1"))
             print("✅ 数据库连接成功:", result)

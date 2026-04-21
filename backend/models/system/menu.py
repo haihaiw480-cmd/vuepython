@@ -1,6 +1,6 @@
 from models.base import BaseModel
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy import String, Integer
+from sqlalchemy import String, Integer, ARRAY
 
 
 class Menu(BaseModel):

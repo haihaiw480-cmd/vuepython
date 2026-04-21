@@ -1,12 +1,6 @@
 from fastapi import APIRouter, Depends
-from database.db import get_db, test_connection
-from models.system.user import User
-from pydantic import BaseModel, Field
-from schemas.response import ResponseModel
-from core.exceptions import BizException
-
+from database.db import get_db
 from typing import Optional
-from utils.response import success, error
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.system.user_service import UserService
 from schemas.system.user import UserQuery, UserLogin

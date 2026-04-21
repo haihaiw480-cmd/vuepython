@@ -9,20 +9,10 @@ from typing import Optional
 from utils.response import success, error
 from sqlalchemy.ext.asyncio import AsyncSession
 from services.system.user_service import UserService
-from schemas.user import UserLogin
+from schemas.system.user import UserQuery, UserLogin
 
 router = APIRouter()
 user_service = UserService()
-
-
-class UserQuery(BaseModel):
-    username: Optional[str] = None
-    user_id: Optional[int] = None
-    password: Optional[str] = None
-    phone: Optional[str] = None
-    email: Optional[str] = None
-    status: Optional[int] = None
-    nickname: Optional[str] = None
 
 
 @router.get("/", status_code=200)

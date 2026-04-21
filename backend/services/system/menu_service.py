@@ -1,4 +1,4 @@
-from repositories.menu_repository import MenuRepository
+from repositories.system.menu_repository import MenuRepository
 
 
 class MenuClass:

@@ -1,9 +1,9 @@
-from repositories.user_repository import UserRepository
+from repositories.system.user_repository import UserRepository
 from core.exceptions import BizException
 from fastapi import HTTPException
 from utils.jwt import verify_token, create_access_token
 from utils.security import hash_password, verify_password
-from schemas.user import UserLogin
+from schemas.system.user import UserLogin
 
 
 class UserService:
@@ -30,9 +30,6 @@ class UserService:
     async def get_user(self, db, username=None, user_id=None):
         return await self.repo.get(db, id=user_id, username=username)
 
-    async def get_user_by_name(self, db, user_name):
-        return await self.repo.get(db, username=user_name)
-
     async def login_by_password(
         self,
         db,
@@ -51,6 +48,3 @@ class UserService:
         if is_ture_password:
             token = create_access_token(params.model_dump())
             return {'token': token}
-        # 生成token
-
-        # verify_password(password,userInfo.password)

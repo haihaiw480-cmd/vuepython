@@ -47,6 +47,7 @@ const tableData = [
 </script>
 
 <template>
+  <el-button> 添加菜单 </el-button>
   <el-table :data="tableData" style="width: 100%">
     <el-table-column fixed prop="date" label="菜单名称" width="150" />
     <el-table-column prop="name" label="菜单图标" width="120" />

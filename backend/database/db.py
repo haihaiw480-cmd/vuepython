@@ -1,24 +1,46 @@
-from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, declarative_base
+from sqlalchemy.ext.asyncio import (
+    create_async_engine,
+    async_sessionmaker,
+    AsyncSession,
+)
+from sqlalchemy.orm import DeclarativeBase
+from typing import AsyncGenerator
+from sqlalchemy import text
+from models.system.user import User
+from models.base import BaseModel
 
-# 使用 sqlite 数据库 数据库文件在当前目录 test.db
-DATABASE_URL = "sqlite:///./test.db"
-# SQLite 默认只能单线程访问 FastAPI 是多线程 → 必须关闭限制
-engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
-# 生成数据库会话（Session）的工厂
-SessionLocal = sessionmaker(bind=engine)
+DATABASE_URL = "mysql+aiomysql://dev:123456@127.0.0.1:3306/vue_fastapi"
 
-# 所有模型类的父类
-Base = declarative_base()
+# 1) Engine（异步）
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=True,  # 开发期可开
+    pool_pre_ping=True,  # 连接健康检查
+)
 
 
-# 创建数据库会话 → 提供给接口使用 → 用完自动关闭
-def get_db():
-    # 生成一个数据库 Session（会话）
-    db = SessionLocal()
+# 3) Session 工厂（2.x 专用）
+AsyncSessionLocal = async_sessionmaker(
+    bind=engine,
+    expire_on_commit=False,
+)
+
+
+# 4) 依赖注入（FastAPI）
+async def get_db() -> AsyncGenerator[AsyncSession, None]:
+    async with AsyncSessionLocal() as session:
+        yield session
+
+
+async def test_connection():
     try:
-        # 把 db 提供给 FastAPI 路由使用
-        yield db
-    finally:
-        # 释放数据库连接（防止泄漏）
-        db.close()
+        # async with engine.begin() as conn:
+        #     await conn.run_sync(BaseModel.metadata.create_all)
+        async with engine.connect() as conn:
+            result = await conn.execute(text("SELECT 1"))
+            print("✅ 数据库连接成功:", result)
+    except Exception as e:
+        print("❌ 连接失败:", e)
+
+
+# asyncio.run(test_connection())

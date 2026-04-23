@@ -35,7 +35,7 @@ class BaseRepository:
         conditions = []
         print(kwargs, 'kwargs')
         for key, value in kwargs.items():
-            if value == None:
+            if value is None:
                 continue
             # ❗字段白名单（推荐用 allowed_fields）
             if key in self.allowed_fields:
@@ -46,7 +46,6 @@ class BaseRepository:
         # if hasattr(self.model, "is_deleted"):
         #     conditions.append(self.model.is_deleted == False)
         if conditions:
-            print(conditions[0], '-----')
             stmt = stmt.where(*conditions)
         result = await db.execute(stmt)
         return result.scalars().all()

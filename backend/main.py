@@ -9,7 +9,10 @@ from sqlalchemy.exc import SQLAlchemyError
 import traceback
 from contextlib import asynccontextmanager
 from database.db import test_connection
+from dotenv import load_dotenv
 
+load_dotenv()
+print(load_dotenv(), '---load_dotenv----')
 # app = FastAPI()
 
 

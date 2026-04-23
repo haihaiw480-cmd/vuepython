@@ -20,15 +20,12 @@ async def agent_run(db, question: str):
     # 1️⃣ 选模型（用于决策）
     model_key = choose_model(question)
     client = clients[model_key]
-
     messages = [
         {"role": "system", "content": "你是后台管理系统助手"},
         {"role": "user", "content": question},
     ]
-
     # 2️⃣ AI决定是否调用工具
     resp = call_llm(client, model_key, messages, TOOLS)
-    print(resp, '00')
     tool = parse_tool(resp)
 
     # 3️⃣ 无工具 → 直接返回

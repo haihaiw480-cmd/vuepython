@@ -1,5 +1,6 @@
-from sqlalchemy import select, update, delete
+from sqlalchemy import select, update, delete, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from typing import Optional
 
 
 class BaseRepository:
@@ -12,6 +13,13 @@ class BaseRepository:
         if not self.allowed_fields:
             return data
         return {k: v for k, v in data.items() if k in self.allowed_fields}
+
+    def _to_dict(self, obj):
+        if isinstance(obj, dict):
+            return obj
+        if hasattr(obj, "__table__"):
+            return {c.name: getattr(obj, c.name) for c in obj.__table__.columns}
+        return obj
 
     async def create(self, db, data):
         data = self.filter_data(data)
@@ -27,7 +35,7 @@ class BaseRepository:
         stmt = update(self.model).where(self.model.id == id).values(**data)
         await db.execute(stmt)
 
-    async def get(self, db: AsyncSession, **kwargs):
+    async def get(self, db: AsyncSession, page, page_size, **kwargs):
 
         stmt = select(self.model)
 
@@ -47,5 +55,19 @@ class BaseRepository:
         #     conditions.append(self.model.is_deleted == False)
         if conditions:
             stmt = stmt.where(*conditions)
+        # -------------------------
+        # 1️⃣ 查询总数
+        # -------------------------
+        count_stmt = select(func.count()).select_from(self.model)
+        if conditions:
+            count_stmt = count_stmt.where(*conditions)
+
+        total = (await db.execute(count_stmt)).scalar()
+        # -------------------------
+        # 2️⃣ 分页
+        # -------------------------
+        stmt = stmt.offset((page - 1) * page_size).limit(page_size)
         result = await db.execute(stmt)
-        return result.scalars().all()
+        rows = result.scalars().all()
+        data = [self._to_dict(r) for r in rows]
+        return {"list": data, "total": total, "page": page, "page_size": page_size}

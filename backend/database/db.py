@@ -37,7 +37,6 @@ async def test_connection():
     try:
 
         async with engine.begin() as conn:
-            print('00------------')
             await conn.run_sync(BaseModel.metadata.create_all)
         async with engine.connect() as conn:
             result = await conn.execute(text("SELECT 1"))

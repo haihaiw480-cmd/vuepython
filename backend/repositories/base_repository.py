@@ -22,12 +22,14 @@ class BaseRepository:
         return obj
 
     async def create(self, db, data):
+        print(data, 'data')
         data = self.filter_data(data)
         obj = self.model(**data)
         db.add(obj)
         await db.flush()  # 把 SQL 发给数据库（但不提交）
         await db.commit()  # 真正写入数据库（持久化）
-        return obj
+        result = [self._to_dict(r) for r in data]
+        return result
 
     async def update(self, db, id: int, data: dict):
         data = self.filter_data(data)
@@ -35,13 +37,12 @@ class BaseRepository:
         stmt = update(self.model).where(self.model.id == id).values(**data)
         await db.execute(stmt)
 
-    async def get(self, db: AsyncSession, page, page_size, **kwargs):
+    async def get(self, db: AsyncSession, kwargs):
 
         stmt = select(self.model)
 
         # 自动拼接 where 条件
         conditions = []
-        print(kwargs, 'kwargs')
         for key, value in kwargs.items():
             if value is None:
                 continue
@@ -66,6 +67,8 @@ class BaseRepository:
         # -------------------------
         # 2️⃣ 分页
         # -------------------------
+        page = kwargs['page']
+        page_size = kwargs['page_size']
         stmt = stmt.offset((page - 1) * page_size).limit(page_size)
         result = await db.execute(stmt)
         rows = result.scalars().all()

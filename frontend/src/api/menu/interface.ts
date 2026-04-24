@@ -1,20 +1,18 @@
 // 登录模块
 export namespace Menu {
     export interface MenuListItem {
-        name: string;
-        route_name: string;
-        path: string;
-        component: string;
-        parent_id: number;
-        sort: number;
-        type: number;
-        perms: string;
-        icon: string;
-        is_hidden: number;
-        id: number;
-        created_at: string;
-        updated_at: string;
-        is_deleted: false;
+        name?: string;
+        routeName?: string;
+        path?: string;
+        component?: string;
+        parent_id?: number;
+        sort?: number;
+        type?: number;
+        perms?: string;
+        icon?: string;
+        is_hidden?: number;
+        id?: number;
+
     }
     export interface LoginRes {
         code: number;
@@ -24,6 +22,11 @@ export namespace Menu {
         };
     }
     export interface MenuParams {
-        type: number;
+        name?: string;
+        routeName?: string;
+        type?: number;
+        is_hidden?: number;
+
+
     }
 }

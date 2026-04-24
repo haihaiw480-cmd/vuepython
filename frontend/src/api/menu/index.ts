@@ -23,3 +23,7 @@ export const getMenuListAll = (params?: Menu.MenuParams) => {
     // return authMenuList;
     return http.get<Response<PageResult<Menu.MenuListItem>>>('/menu/list', params)
 };
+export const PostMenuAdd = (params?: Menu.MenuListItem) => {
+    // return authMenuList;
+    return http.post<Response<PageResult<Menu.MenuListItem>>>('/menu/add', params)
+};

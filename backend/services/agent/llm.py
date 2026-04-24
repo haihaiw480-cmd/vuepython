@@ -8,7 +8,6 @@ def get_clients() -> Dict[str, OpenAI]:
     clients = {}
 
     qwen_key = os.getenv("DASHSCOPE_API_KEY")
-    print(os.getenv("DASHSCOPE_API_KEY"))
     if qwen_key:
         clients["qwen-turbo"] = OpenAI(
             api_key=qwen_key,

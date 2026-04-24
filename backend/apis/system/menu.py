@@ -4,6 +4,7 @@ from database.db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.response import ResponseModel, success
 from typing import Optional
+from schemas.system.menu import MenuItem, MenuSearch
 
 router = APIRouter()
 menu_service = MenuService()
@@ -16,18 +17,17 @@ async def root():
 
 @router.get("/list", response_model=ResponseModel)
 async def get_menu_list(
+    params: MenuSearch = Depends(),
     db: AsyncSession = Depends(get_db),
-    pageNum: int = 1,
-    page_size: int = 10,
-    type: Optional[int] = None,
 ):
-    data = await menu_service.get_menu_list(db, pageNum, page_size, type)
+    data = await menu_service.get_menu_list(db, params)
     return success(data)
 
 
 @router.post("/add", response_model=ResponseModel)
-async def menu_add(data: dict, db: AsyncSession = Depends(get_db)):
-    return success(data)
+async def menu_add(data: MenuItem, db: AsyncSession = Depends(get_db)):
+    datalist = await menu_service.create_menu(db, data)
+    return success(datalist)
     pass
     # data = await menu_service.get_menu_list(db)
     # return success(data)

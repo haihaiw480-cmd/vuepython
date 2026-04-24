@@ -1,45 +1,33 @@
 <script lang="ts" setup>
 import { reactive, ref, onMounted } from "vue";
-import { getMenuListAll } from "@/api/menu/index";
+import { getMenuListAll, PostMenuAdd } from "@/api/menu/index";
 import { type Menu } from "@/api/menu/interface";
-import type { FormInstance, FormRules } from "element-plus";
+import { type FormInstance, type FormRules } from "element-plus";
 const currentPage4 = ref(4);
 const pageSize4 = ref(100);
 // ref<数组类型>(初始值)
 const catalogue = ref<Menu.MenuListItem[]>([]);
 const dialogFormVisible = ref(false);
-const rules = reactive<FormRules<Form>>({
+const rules = reactive<FormRules<Menu.MenuListItem>>({
   name: [
     { required: true, message: "Please input Activity name", trigger: "blur" },
-    { min: 3, max: 5, message: "Length should be 3 to 5", trigger: "blur" },
+  ],
+  routeName: [
+    { required: true, message: "Please input Activity name", trigger: "blur" },
+  ],
+  path: [
+    { required: true, message: "Please input Activity name", trigger: "blur" },
+  ],
+  type: [
+    { required: true, message: "Please input Activity name", trigger: "blur" },
   ],
 });
 const menuFormRef = ref<FormInstance>();
 const handleClick = () => {
   console.log("click");
 };
-interface Form {
-  name?: string;
-  routeName?: string;
-  path?: string;
-  component?: string;
-  parent_id?: number;
-  type?: number;
-  perms?: string;
-  icon?: string;
-  is_hidden?: number;
-}
-const form = reactive<Form>({
-  name: undefined,
-  routeName: undefined,
-  path: undefined,
-  component: undefined,
-  parent_id: undefined,
-  type: undefined,
-  perms: undefined,
-  icon: undefined,
-  is_hidden: undefined,
-});
+const serchFrom = reactive<Menu.MenuParams>({});
+const form = reactive<Menu.MenuListItem>({});
 const tableData = ref<any[]>([]);
 const handleMenuList = async () => {
   const res = await getMenuListAll();
@@ -56,12 +44,23 @@ const handleOpen = async () => {
   await getAllCatalogue();
   dialogFormVisible.value = true;
 };
-const resetForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
+const resetForm = async (menuFormRef: FormInstance | undefined) => {
+  if (!menuFormRef) return;
+  menuFormRef.resetFields();
+  dialogFormVisible.value = false;
 };
 
-const submitForm = async (formEl: FormInstance | undefined) => {
-  if (!formEl) return;
+const submitForm = async (menuFormRef: FormInstance | undefined) => {
+  if (!menuFormRef) return;
+  console.log(
+    menuFormRef.validate(async (value) => {
+      if (value) {
+        const data = await PostMenuAdd(form);
+        console.log(data);
+      }
+    }),
+    "menuFormRef",
+  );
 };
 onMounted(() => {
   handleMenuList();
@@ -69,6 +68,25 @@ onMounted(() => {
 </script>
 
 <template>
+  <el-form :model="serchFrom" ref="menuSerchFormRef">
+    <el-form-item label="菜单名称" prop="name">
+      <el-input v-model="serchFrom.name" autocomplete="off" />
+    </el-form-item>
+    <el-form-item label="路由名称" prop="name">
+      <el-input v-model="serchFrom.routeName" autocomplete="off" />
+    </el-form-item>
+
+    <el-form-item label="类型" prop="type">
+      <el-select v-model="serchFrom.type" autocomplete="off">
+        <el-option label="目录" :value="1" />
+        <el-option label="菜单" :value="2" />
+        <el-option label="按钮" :value="3" />
+      </el-select>
+    </el-form-item>
+    <el-form-item label="是否隐藏" prop="is_hidden">
+      <el-input v-model="serchFrom.is_hidden" autocomplete="off"> </el-input>
+    </el-form-item>
+  </el-form>
   <el-button @click="handleOpen"> 添加菜单 </el-button>
   <el-table :data="tableData" style="width: 100%">
     <el-table-column fixed prop="name" label="菜单名称" width="150" />
@@ -88,6 +106,7 @@ onMounted(() => {
       </template>
     </el-table-column>
   </el-table>
+  {{ currentPage4 }}{{ pageSize4 }}
   <el-pagination
     v-model:current-page="currentPage4"
     v-model:page-size="pageSize4"
@@ -95,7 +114,7 @@ onMounted(() => {
     :total="1000"
   />
   <el-dialog v-model="dialogFormVisible" title="添加菜单" width="500">
-    <el-form :model="form" :rule="rules" ref="menuFormRef">
+    <el-form :model="form" :rules="rules" ref="menuFormRef">
       <el-form-item label="父级菜单" prop="parent_id">
         <el-select v-model="form.parent_id">
           <el-option
@@ -109,10 +128,13 @@ onMounted(() => {
       <el-form-item label="菜单名称" prop="name">
         <el-input v-model="form.name" autocomplete="off" />
       </el-form-item>
+      <el-form-item label="路由名称" prop="name">
+        <el-input v-model="form.routeName" autocomplete="off" />
+      </el-form-item>
       <el-form-item label="菜单图标" prop="icon">
         <el-input v-model="form.icon" autocomplete="off" />
       </el-form-item>
-      <el-form-item label="路由名称" prop="path">
+      <el-form-item label="路由路径" prop="path">
         <el-input v-model="form.path" autocomplete="off" />
       </el-form-item>
       <el-form-item label="组件路径" prop="component">
@@ -120,9 +142,9 @@ onMounted(() => {
       </el-form-item>
       <el-form-item label="类型" prop="type">
         <el-select v-model="form.type" autocomplete="off">
-          <el-option label="目录" value="1" />
-          <el-option label="菜单" value="2" />
-          <el-option label="按钮" value="3" />
+          <el-option label="目录" :value="1" />
+          <el-option label="菜单" :value="2" />
+          <el-option label="按钮" :value="3" />
         </el-select>
       </el-form-item>
       <el-form-item label="权限标识" prop="perms">
@@ -134,7 +156,7 @@ onMounted(() => {
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button @cancel="resetForm(menuFormRef)">Cancel</el-button>
+        <el-button @click="resetForm(menuFormRef)">Cancel</el-button>
         <el-button type="primary" @click="submitForm(menuFormRef)">
           Confirm
         </el-button>

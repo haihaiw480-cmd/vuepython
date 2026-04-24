@@ -8,6 +8,24 @@ class MenuService:
     def __init__(self):
         self.repo = MenuRepository()
 
-    async def get_menu_list(self, db, page, page_size, type):
+    async def get_menu_list(self, db, params):
+        if params is None:
+            params_dict = {}
+        elif isinstance(params, dict):
+            params_dict = params
+        else:
+            params_dict = params.model_dump()
+        return await self.repo.get(db, params_dict)
 
-        return await self.repo.get(db, page, page_size, type=type)
+    # 创建菜单
+    async def create_menu(self, db, data):
+
+        data_dict = data.model_dump()
+
+        name = data_dict["name"]
+        params = {'name': name, 'page': 1, "page_size": 10}
+        result = await self.get_menu_list(db, params)
+        if result['total'] > 0:
+            # 提示该菜单名已经存在
+            raise ValueError("菜单名称已存在")
+        return await self.repo.create(db, data_dict)

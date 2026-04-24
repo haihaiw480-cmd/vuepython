@@ -74,3 +74,6 @@ class BaseRepository:
         rows = result.scalars().all()
         data = [self._to_dict(r) for r in rows]
         return {"list": data, "total": total, "page": page, "page_size": page_size}
+
+    async def delete(self, db: AsyncSession, kwargs):
+        pass

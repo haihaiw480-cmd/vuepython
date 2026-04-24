@@ -29,3 +29,17 @@ class MenuService:
             # 提示该菜单名已经存在
             raise ValueError("菜单名称已存在")
         return await self.repo.create(db, data_dict)
+
+    # 删除菜单
+    async def delete_menu(self, db, id):
+
+        params = {'id': id, 'page': 1, "page_size": 10}
+        result = await self.get_menu_list(db, params)
+        if result['total'] < 0:
+            # 提示该菜单名已经存在
+            raise ValueError("菜单不存在")
+
+        # 查找改木下是否子项
+        params = {'id': id, 'page': 1, "page_size": 10}
+
+        return

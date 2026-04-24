@@ -24,10 +24,14 @@ async def get_menu_list(
     return success(data)
 
 
+# 新增menu
 @router.post("/add", response_model=ResponseModel)
 async def menu_add(data: MenuItem, db: AsyncSession = Depends(get_db)):
     datalist = await menu_service.create_menu(db, data)
     return success(datalist)
-    pass
-    # data = await menu_service.get_menu_list(db)
-    # return success(data)
+
+
+@router.delete("/add", response_model=ResponseModel)
+async def menu_delete(data: MenuItem, db: AsyncSession = Depends(get_db)):
+    datalist = await menu_service.create_menu(db, data)
+    return success(datalist)

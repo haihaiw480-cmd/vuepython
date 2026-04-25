@@ -67,13 +67,61 @@ class BaseRepository:
         # -------------------------
         # 2️⃣ 分页
         # -------------------------
-        page = kwargs['page']
-        page_size = kwargs['page_size']
-        stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+        page = kwargs.get("page")
+        page_size = kwargs.get("page_size")
+        if page and page_size:
+            stmt = stmt.offset((page - 1) * page_size).limit(page_size)
+            result = await db.execute(stmt)
+            rows = result.scalars().all()
+            data = [self._to_dict(r) for r in rows]
+            return {"list": data, "total": total, "page": page, "page_size": page_size}
         result = await db.execute(stmt)
         rows = result.scalars().all()
         data = [self._to_dict(r) for r in rows]
-        return {"list": data, "total": total, "page": page, "page_size": page_size}
+        return data
 
-    async def delete(self, db: AsyncSession, kwargs):
-        pass
+    # 单个删除
+    async def delete(self, db, id: int):
+        stmt = update(self.model).where(self.model.id == id).values(is_deleted=1)
+        await db.execute(stmt)
+        await db.commit()
+        return True
+
+    # 物理删除
+    async def delete_item(self, db, id: int):
+        stmt = delete(self.model).where(self.model.id == id)
+        result = await db.execute(stmt)
+        await db.commit()
+        # rowcount = 实际删除条数
+        if result.rowcount == 0:
+            return False
+        return True
+
+    # 批量删除
+    async def batch_delete(self, db, ids: list[int]):
+        stmt = update(self.model).where(self.model.id.in_(ids)).values(is_deleted=1)
+        await db.execute(stmt)
+        await db.commit()
+        return True
+
+    # 部分更新
+    async def patch(self, db, id, data):
+        # 1️⃣ 转 dict（Pydantic 模型）
+        update_data = data.dict(exclude_unset=True)
+
+        # 2️⃣ 过滤 None（可选但推荐）
+        update_data = {k: v for k, v in update_data.items() if v is not None}
+
+        # 3️⃣ 字段白名单（防止乱更新）
+        update_data = {k: v for k, v in update_data.items() if k in self.allowed_fields}
+
+        if not update_data:
+            return None  # 或抛异常
+
+        # 4️⃣ 执行更新
+        stmt = update(self.model).where(self.model.id == id).values(**update_data)
+
+        await db.execute(stmt)
+        await db.commit()
+
+        return True

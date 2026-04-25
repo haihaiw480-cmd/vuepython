@@ -4,7 +4,7 @@ from database.db import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemas.response import ResponseModel, success
 from typing import Optional
-from schemas.system.menu import MenuItem, MenuSearch
+from dto.system.menu_dto import SearchMenuParams, MenuItem, PatchMenu
 
 router = APIRouter()
 menu_service = MenuService()
@@ -17,7 +17,7 @@ async def root():
 
 @router.get("/list", response_model=ResponseModel)
 async def get_menu_list(
-    params: MenuSearch = Depends(),
+    params: SearchMenuParams = Depends(),
     db: AsyncSession = Depends(get_db),
 ):
     data = await menu_service.get_menu_list(db, params)
@@ -31,7 +31,14 @@ async def menu_add(data: MenuItem, db: AsyncSession = Depends(get_db)):
     return success(datalist)
 
 
-@router.delete("/add", response_model=ResponseModel)
-async def menu_delete(data: MenuItem, db: AsyncSession = Depends(get_db)):
-    datalist = await menu_service.create_menu(db, data)
+@router.delete("/delete/{id}", response_model=ResponseModel)
+async def menu_delete(id: int, db: AsyncSession = Depends(get_db)):
+    datalist = await menu_service.delete_menu(db, id)
     return success(datalist)
+
+
+# 部分更新
+@router.patch("/updata/{id}", response_model=ResponseModel)
+async def menu_updata(id: int, data: PatchMenu, db: AsyncSession = Depends(get_db)):
+    result = await menu_service.patch_menu(db, id, data)
+    return success(result)

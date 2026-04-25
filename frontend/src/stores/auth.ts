@@ -1,26 +1,31 @@
 
 import { defineStore } from "pinia";
-import { getMenuList } from "@/api/menu/index";
+import { getMenuListAll } from "@/api/menu/index";
 import { piniaPersistConfig } from "@/stores/persist";
-import { flatMenuList } from "@/utils/index"
+import { flatMenuList, makeMenuTree } from "@/utils/index"
+
 export const useAuthStore = defineStore("auth", {
     // 数据 (data)
     state: () => ({
         // 菜单权限列表
-        authMenuList: [] as Menu.MenuOptions[],
+        authMenuList: [],
+        authMenuListAll: [] as Menu.MenuItem[]
     }),
     // store 的计算属性 (computed)
     getters: {
         authMenuListGet: state => state.authMenuList,
-        // 扁平化处理router
-        authFlatMenuList: state => flatMenuList(state.authMenuList)
+
+
+        authMenuListAllGet: state => state.authMenuListAll,
+        authMenuListAllTree: state => makeMenuTree(state.authMenuListAll),
+
     },
     // store 的方法 (methods)
     actions: {
-        // 获取菜单权限列表
-        async getAuthMenuList() {
-            const { data } = await getMenuList()
-            this.authMenuList = data
+        async getMenuListAll() {
+            const { data } = await getMenuListAll()
+            const list = Array.isArray(data) ? data : data.list
+            this.authMenuListAll = list
         }
     },
 });

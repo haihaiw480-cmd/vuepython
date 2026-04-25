@@ -1,7 +1,4 @@
 from fastapi import FastAPI, Request
-from fastapi.exceptions import RequestValidationError
-from core.exceptions import BizException
-from utils.response import success, error
 from init.router import init_router
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -82,6 +79,6 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={
             "code": 500,
-            "msg": "服务器内部错误",
+            "msg": str(exc),
         },
     )

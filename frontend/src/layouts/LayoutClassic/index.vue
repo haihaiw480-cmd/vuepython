@@ -31,7 +31,7 @@ import { useAuthStore } from "@/stores/auth";
 import MenuItem from "../components/MenuItem/index.vue";
 import { computed } from "vue";
 const authStore = useAuthStore();
-const menuList = authStore.authMenuListGet;
+const menuList = authStore.authMenuListAllTree;
 </script>
 <style scoped lang="scss">
 @import "./index.scss";

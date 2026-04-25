@@ -21,12 +21,5 @@ export namespace Menu {
             access_token: string;
         };
     }
-    export interface MenuParams {
-        name?: string;
-        routeName?: string;
-        type?: number;
-        is_hidden?: number;
 
-
-    }
 }

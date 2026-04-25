@@ -1,5 +1,6 @@
 <script setup lang="ts" name="MenuItem">
 import { useRouter } from "vue-router";
+
 const modules = import.meta.glob("@/views/**/*.vue");
 const router = useRouter();
 // import * as Icons from "@element-plus/icons-vue";
@@ -8,11 +9,11 @@ defineOptions({
   name: "MenuItem",
 });
 
-defineProps<{ menuList: Menu.MenuOptions[] }>();
+defineProps<{ menuList: Menu.MenuItem[] }>();
 // 路由跳转
-const handleClickMenu = (subItem: Menu.MenuOptions) => {
+const handleClickMenu = (subItem: Menu.MenuItem) => {
   console.log(
-    subItem.component,
+    subItem,
     `/src/views${subItem.component}.vue`,
     modules[`/src/views${subItem.component}.vue`],
   );
@@ -25,25 +26,20 @@ const handleClickMenu = (subItem: Menu.MenuOptions) => {
   <template v-for="subItem in menuList" :key="subItem.path">
     <el-sub-menu v-if="subItem.children?.length" :index="subItem.path">
       <template #title>
-        <el-icon v-if="subItem.meta.icon">
-          <!-- <component :is="Icons[subItem.meta.icon]" /> -->
-        </el-icon>
-        <span class="sle">{{ subItem.meta.title }}</span>
+        <el-icon v-if="subItem.icon"> </el-icon>
+        <span class="sle">{{ subItem.name }}</span>
       </template>
 
       <MenuItem :menu-list="subItem.children" />
     </el-sub-menu>
-
     <el-menu-item
       v-else
       :index="subItem.path"
       @click="handleClickMenu(subItem)"
     >
       <template #title>
-        <el-icon v-if="subItem.meta.icon">
-          <!-- <component :is="Icons[subItem.meta.icon]" /> -->
-        </el-icon>
-        <span class="sle">{{ subItem.meta.title }}</span>
+        <el-icon v-if="subItem.icon"> </el-icon>
+        <span class="sle">{{ subItem.name }}</span>
       </template>
     </el-menu-item>
   </template>

@@ -1,7 +1,7 @@
 // import http from "../index";
 // import { type MenuListRes } from "@/api/menu/interface";
 import authMenuList from "@/assets/json/authMenuList.json";
-import { type Menu } from "@/api/menu/interface"
+// import { type Menu } from "@/api/menu/interface"
 import authButtonList from "@/assets/json/authButtonList.json";
 export interface Response<T> {
     code: number;
@@ -9,7 +9,13 @@ export interface Response<T> {
     msg: string;
 }
 export interface PageResult<T> {
-    list: T[];
+    list: T;
+    total: number;
+    page: number;
+    page_size: number;
+}
+export interface DataRusult<T> {
+    list: T;
     total: number;
     page: number;
     page_size: number;
@@ -21,9 +27,14 @@ export const getMenuList = () => {
 };
 export const getMenuListAll = (params?: Menu.MenuParams) => {
     // return authMenuList;
-    return http.get<Response<PageResult<Menu.MenuListItem>>>('/menu/list', params)
+    return http.get<Response<PageResult<Menu.MenuItem[]> | Menu.MenuItem[]>>('/menu/list', params)
 };
-export const PostMenuAdd = (params?: Menu.MenuListItem) => {
+export const PostMenuAdd = (params?: Menu.CreatMenuPrams) => {
     // return authMenuList;
-    return http.post<Response<PageResult<Menu.MenuListItem>>>('/menu/add', params)
+    return http.post<Response<PageResult<Menu.MenuItem>>>('/menu/add', params)
+};
+// 删除菜单
+export const deletetMenu = (id: number) => {
+    // return authMenuList;
+    return http.delete<Response<PageResult<Menu.MenuItem>>>(`/menu/delete/${id}`)
 };

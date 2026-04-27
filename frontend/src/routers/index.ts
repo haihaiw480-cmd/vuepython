@@ -11,7 +11,7 @@ const routes: Array<RouteRecordRaw> = [
 
 // 创建 router
 const router = createRouter({
-    history: createWebHashHistory(),
+    history: createWebHistory(),
     routes
 })
 // 路由守卫（控制登录）
@@ -25,7 +25,6 @@ router.beforeEach(async (to, from, next) => {
         next('/login');
     }
     if (!authStore.authMenuListAllGet.length && token) {
-        alert(2)
         await dynamicRouter();
         return next({ ...to, replace: true });
         // next({ ...to, replace: true }); // ❗ 必须

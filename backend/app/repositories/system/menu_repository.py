@@ -1,0 +1,7 @@
+from backend.app.repositories.base_repository import BaseRepository
+from backend.app.models.system.menu import Menu
+
+
+class MenuRepository(BaseRepository):
+    def __init__(self):
+        super().__init__(Menu, allowed_fields=[c.name for c in Menu.__table__.columns])

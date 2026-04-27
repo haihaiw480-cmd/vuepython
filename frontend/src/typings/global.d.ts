@@ -34,9 +34,6 @@ declare global {
             children?: MenuItem[];
             sort?: number;
             perms?: string;
-
-
-
         }
 
         interface MenuParams {
@@ -49,6 +46,20 @@ declare global {
             id?: number;
         }
         interface CreatMenuPrams {
+            name?: string;
+            routeName?: string;
+            path?: string;
+            component?: string | (() => Promise<unknown>);
+            routeName?: string;
+            parentId?: number;
+            type?: number; // 1目录 2菜单 3按钮
+            icon?: string;
+            isHidden?: number;
+            sort?: number;
+            perms?: string;
+
+        }
+        interface UpdataMenuPrams {
             name?: string;
             routeName?: string;
             path?: string;

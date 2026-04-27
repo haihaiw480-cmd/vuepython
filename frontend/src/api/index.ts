@@ -83,6 +83,9 @@ class RequestHttp {
     delete<T>(url: string, params?: object): Promise<T> {
         return this.service.delete(url, { params })
     }
+    patch<T>(url: string, params?: object): Promise<T> {
+        return this.service.patch(url, params)
+    }
 }
 
 

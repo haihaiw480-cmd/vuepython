@@ -33,6 +33,11 @@ export const PostMenuAdd = (params?: Menu.CreatMenuPrams) => {
     // return authMenuList;
     return http.post<Response<PageResult<Menu.MenuItem>>>('/menu/add', params)
 };
+// 编辑菜单
+export const patchMenu = (id: number, params?: Menu.UpdataMenuPrams,) => {
+    return http.patch<Response<PageResult<Menu.MenuItem>>>(`/menu/updata/${id}`, params)
+
+}
 // 删除菜单
 export const deletetMenu = (id: number) => {
     // return authMenuList;

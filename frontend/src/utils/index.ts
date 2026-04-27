@@ -35,3 +35,32 @@ export const makeMenuTree = (menuList: Menu.MenuItem[]) => {
     })
     return menuTree
 }
+export const selectMenuTree = (menuList: Menu.MenuItem[]) => {
+    const menuTreeMap = new Map()
+    const menuAll: Array<object> = []
+    const menuTree: Array<object> = []
+    menuList.forEach(item => {
+        menuTreeMap.set(item.id, { ...item, children: [] })
+    })
+    menuList.forEach(item => {
+        const node = menuTreeMap.get(item.id)
+        const nodeOpthon = {
+            label: node.name,
+            value: node.id,
+            children: node.children
+        }
+        if (item.parentId) {
+            const parentNode = menuTreeMap.get(item.parentId)
+            parentNode.children.push(nodeOpthon)
+        } else {
+            menuTree.push(nodeOpthon)
+        }
+    })
+    menuAll.push({
+        label: "主目录",
+        value: undefined,
+        children: menuTree
+    })
+
+    return menuAll
+}

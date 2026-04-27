@@ -1,8 +1,13 @@
 <script lang="ts" setup>
 import { reactive, ref, onMounted } from "vue";
-import { getMenuListAll, PostMenuAdd, deletetMenu } from "@/api/menu/index";
+import {
+  getMenuListAll,
+  PostMenuAdd,
+  deletetMenu,
+  patchMenu,
+} from "@/api/menu/index";
 import { type FormInstance, type FormRules, ElMessage } from "element-plus";
-import { makeMenuTree } from "@/utils/index";
+import { makeMenuTree, selectMenuTree } from "@/utils/index";
 
 /* ================= 基础状态 ================= */
 
@@ -22,8 +27,11 @@ const defaultForm: Menu.CreatMenuPrams = {
   isHidden: 0,
 };
 const form = reactive<Menu.CreatMenuPrams>({ ...defaultForm });
-
+const editId = ref<number>();
 const menuFormRef = ref<FormInstance>();
+const dialogTitle = ref<string>();
+const type = ref<string>();
+const treeSelect = reactive([]);
 
 /* ================= 校验 ================= */
 
@@ -46,24 +54,24 @@ const getList = (data: any): Menu.MenuItem[] =>
 const handleMenuList = async () => {
   const { data, code } = await getMenuListAll();
   if (code !== 200) return;
-
   const list = getList(data);
   tableData.value = makeMenuTree(list);
+  Object.assign(treeSelect, selectMenuTree(list));
 };
 
 // 编辑
 const handleClick = async (row: Menu.MenuItem) => {
+  dialogTitle.value = "编辑菜单";
+  type.value = "edit";
+  editId.value = row.id;
   const { data, code, msg } = await getMenuListAll({ id: row.id });
-
   if (code !== 200) {
     ElMessage.error(msg);
     return;
   }
-
   const list = getList(data);
   const item = list[0];
   if (!item) return;
-
   Object.assign(form, item);
   dialogFormVisible.value = true;
 };
@@ -77,6 +85,8 @@ const handleDelete = async (row: Menu.MenuItem) => {
 
 // 打开弹窗（新增）
 const handleOpen = () => {
+  dialogTitle.value = "新增菜单";
+  type.value = "add";
   Object.assign(form, defaultForm);
   dialogFormVisible.value = true;
 };
@@ -90,12 +100,26 @@ const resetForm = () => {
 // 提交
 const submitForm = async () => {
   await menuFormRef.value?.validate();
-
-  await PostMenuAdd(form);
-  ElMessage.success("提交成功");
-
-  dialogFormVisible.value = false;
+  if (type.value == "add") {
+    await PostMenuAdd(form);
+    ElMessage.success("提交成功");
+  } else {
+    if (editId.value !== undefined) {
+      patchMenu(editId.value, form);
+    }
+  }
   handleMenuList();
+  dialogFormVisible.value = false;
+  function leetcode(nums: Array<number>) {
+    let i = 0;
+    while (i < nums.length) {
+      if (2 * i >= nums.length) {
+        i++;
+      } else {
+        return i - 1;
+      }
+    }
+  }
 };
 
 onMounted(handleMenuList);
@@ -138,47 +162,99 @@ onMounted(handleMenuList);
   </el-table>
 
   <!-- 弹窗 -->
-  <el-dialog v-model="dialogFormVisible" title="菜单" width="500">
+  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="800">
     <el-form :model="form" :rules="rules" ref="menuFormRef">
-      <el-form-item label="父级菜单" prop="parentId">
-        <el-input v-model="form.parentId" />
-      </el-form-item>
-
-      <el-form-item label="菜单名称" prop="name">
-        <el-input v-model="form.name" />
-      </el-form-item>
-
-      <el-form-item label="路由名称" prop="routeName">
-        <el-input v-model="form.routeName" />
-      </el-form-item>
-
-      <el-form-item label="图标" prop="icon">
-        <el-input v-model="form.icon" />
-      </el-form-item>
-
-      <el-form-item label="路径" prop="path">
-        <el-input v-model="form.path" />
-      </el-form-item>
-
-      <el-form-item label="组件" prop="component">
-        <el-input v-model="form.component" />
-      </el-form-item>
-
-      <el-form-item label="类型" prop="type">
-        <el-select v-model="form.type">
-          <el-option label="目录" :value="1" />
-          <el-option label="菜单" :value="2" />
-          <el-option label="按钮" :value="3" />
-        </el-select>
-      </el-form-item>
-
-      <el-form-item label="权限" prop="perms">
-        <el-input v-model="form.perms" />
-      </el-form-item>
-
-      <el-form-item label="是否隐藏" prop="isHidden">
-        <el-input v-model="form.isHidden" />
-      </el-form-item>
+      <el-row :gutter="10">
+        <el-form-item label="父级菜单" prop="parentId">
+          <el-tree-select
+            v-model="form.parentId"
+            :data="treeSelect"
+            :render-after-expand="false"
+            style="width: 240px"
+          />
+        </el-form-item>
+      </el-row>
+      <el-row :gutter="10">
+        <el-form-item label="类型" prop="type">
+          <el-radio-group v-model="form.type">
+            <el-radio :value="1">目录</el-radio>
+            <el-radio :value="2">菜单</el-radio>
+            <el-radio :value="3">按钮</el-radio>
+          </el-radio-group>
+        </el-form-item>
+      </el-row>
+      <el-row :gutter="10">
+        <el-col :span="12">
+          <el-form-item label="菜单图标" prop="icon">
+            <el-input v-model="form.icon" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="显示排序" prop="icon">
+            <el-input v-model="form.icon" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="10">
+        <el-col :span="12">
+          <el-form-item label="菜单名称" prop="name">
+            <el-input v-model="form.name" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="路由名称" prop="routeName">
+            <el-input v-model="form.routeName" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="10">
+        <el-col :span="12">
+          <el-form-item label="是否外链" prop="routeName">
+            <el-input v-model="form.routeName" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="路由地址" prop="path">
+            <el-input v-model="form.path" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="10">
+        <el-col :span="12">
+          <el-form-item label="是否缓存" prop="isHidden">
+            <el-input v-model="form.isHidden" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="路由参数" prop="isHidden">
+            <el-input v-model="form.isHidden" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="10">
+        <el-col :span="12">
+          <el-form-item label="是否隐藏" prop="isHidden">
+            <el-input v-model="form.isHidden" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="菜单状态" prop="isHidden">
+            <el-input v-model="form.isHidden" />
+          </el-form-item>
+        </el-col>
+      </el-row>
+      <el-row :gutter="10">
+        <el-col :span="12">
+          <el-form-item label="组件路径" prop="component">
+            <el-input v-model="form.component" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="权限" prop="perms">
+            <el-input v-model="form.perms" />
+          </el-form-item>
+        </el-col>
+      </el-row>
     </el-form>
 
     <template #footer>
